@@ -1,0 +1,7 @@
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression\bin\Debug\ParsingExpression.exe.config
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression\bin\Debug\ParsingExpression.exe
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression\bin\Debug\ParsingExpression.pdb
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression\obj\Debug\ParsingExpression.csprojResolveAssemblyReference.cache
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression\obj\Debug\ParsingExpression.csproj.CoreCompileInputs.cache
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression\obj\Debug\ParsingExpression.exe
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression\obj\Debug\ParsingExpression.pdb
