@@ -22,6 +22,7 @@ namespace ParsingExpression
             rangeOp,
             anyChar,
             ch,
+            notClass
         }
 
         class Token
@@ -55,13 +56,15 @@ namespace ParsingExpression
         (?<orOp>            \|                              )|
         (?<escapedChar>     (\\.)                           )|
         (?<quantor>         [\*\?\+]|(\{((\d+)|(\d+,)|(,\d+)|(\d+,\d+))\})       )|
-        (?<charClass>       (\[(
+        (?<charClass>       (\[
+            (?<notClass>     (\^)                   )*
+                                (
             (?<escapedChar>     (\\.)               )|
             (?<rangeOp>         (\-)                )|
             (?<ch>              .                   )
                                         )*\])               )|
         (?<anyChar>            \.                           )|
-        (?<ch>              [^\&\!\(\)\[\|\.\\]+              )
+        (?<ch>              [^\*\+\{\?\&\!\(\)\[\|\.\\]+              )
         )*$
         ";
 
@@ -115,7 +118,7 @@ namespace ParsingExpression
             Token[] tokens;
 
             if (this.TryTokenize(pattern, out tokens))
-            {
+             {
                 expr = this.ParseImpl(tokens, 0, tokens.Length - 1);
             }
             else
@@ -187,6 +190,32 @@ namespace ParsingExpression
             throw new NotImplementedException("");
         }
 
+        Expr GiveEscape(Token t)
+        {
+            Expr escape;
+            if (t.str[1] == 'w')
+                escape = Expr.LetterOrDigitChar();
+            else if (t.str[1] == 'W')
+                escape = Expr.NotLetterOrDigitChar();
+            else if (t.str[1] == 'd')
+                escape = Expr.DigitChar();
+            else if (t.str[1] == 'D')
+                escape = Expr.NotDigitChar();
+            else if (t.str[1] == 's')
+                escape = Expr.WhitespaceChar();
+            else if (t.str[1] == 'S')
+                escape = Expr.NotWhitespaceChar();
+            else if (t.str[1] == 'n')
+                escape = Expr.Characters("\n");
+            else if (t.str[1] == 'r')
+                escape = Expr.Characters("\r");
+            else if (t.str[1] == 't')
+                escape = Expr.Characters("\t");
+            else
+                escape = Expr.Characters(t.str[1].ToString());
+            return escape;
+        }
+
         Expr ParseImpl(Token[] tokens, int from, int to)
         {
             var items = new LinkedList<Expr>();
@@ -238,20 +267,7 @@ namespace ParsingExpression
                         items.AddLast(Expr.Characters(t.str));
                         break;
                     case TokenKind.escapedChar:
-                        if (t.str[1] == 'w')
-                            items.AddLast(Expr.Characters(":word:"));
-                        else if (t.str[1] == 'W')
-                            items.AddLast(Expr.Characters(":notword:"));
-                        else if (t.str[1] == 'd')
-                            items.AddLast(Expr.Characters(":digit:"));
-                        else if (t.str[1] == 'D')
-                            items.AddLast(Expr.Characters(":notdigit:"));
-                        else if (t.str[1] == 's')
-                            items.AddLast(Expr.Characters(":space:"));
-                        else if (t.str[1] == 'S')
-                            items.AddLast(Expr.Characters(":notspace:"));
-                        else
-                            items.AddLast(Expr.Characters(t.str[1].ToString()));
+                        items.AddLast(GiveEscape(t));
                         break;
                     case TokenKind.rangeOp:
                         return null;
@@ -311,6 +327,8 @@ namespace ParsingExpression
         {
             var alts = new LinkedList<Expr>();
 
+            var invertClass = false;
+
             var classToken = tokens[i];
             for (int l = 2; l < classToken.str.Length;)
             {
@@ -320,25 +338,15 @@ namespace ParsingExpression
 
                 switch (ct.kind)
                 {
+                    case TokenKind.notClass:
+                        invertClass = true;
+                        break;
                     case TokenKind.ch:
                         ct.str.ForEach(c => alts.AddLast(Expr.Characters(c.ToString())));
                         break;
                     case TokenKind.escapedChar:
-                        if (ct.str[1] == 'w')
-                            alts.AddLast(Expr.Characters(":word:"));
-                        else if (ct.str[1] == 'W')
-                            alts.AddLast(Expr.Characters(":notword:"));
-                        else if (ct.str[1] == 'd')
-                            alts.AddLast(Expr.Characters(":digit:"));
-                        else if (ct.str[1] == 'D')
-                            alts.AddLast(Expr.Characters(":notdigit:"));
-                        else if (ct.str[1] == 's')
-                            alts.AddLast(Expr.Characters(":space:"));
-                        else if (ct.str[1] == 'S')
-                            alts.AddLast(Expr.Characters(":notspace:"));
-                        else
-                            alts.AddLast(Expr.Characters(ct.str[1].ToString()));
-                            break;
+                        alts.AddLast(GiveEscape(ct));
+                        break;
                     case TokenKind.rangeOp:
                         var lastChar = alts.Last.Value as CharsExpr;
                         if (lastChar == null)
@@ -357,7 +365,17 @@ namespace ParsingExpression
                 }
             }
 
-            return Expr.Alternatives(alts.ToArray());
+            var classExpr = Expr.Alternatives(alts.ToArray());
+
+            if (invertClass)
+            {
+                classExpr = Expr.Sequence(
+                    Expr.CheckNot(classExpr),
+                    Expr.AnyChar()
+                );
+            }
+
+            return classExpr;
         }
     }
 }

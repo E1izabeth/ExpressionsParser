@@ -268,4 +268,71 @@ namespace ParsingExpression
             return collector.Complete();
         }
     }
+
+    class NumExprNodeStringCollector : INumExprVisitor<string>
+    {
+        public static readonly NumExprNodeStringCollector Instance = new NumExprNodeStringCollector();
+
+        string INumExprVisitor<string>.VisitBinExpr(NumBinExpr numBinExpr)
+        {
+            return numBinExpr.Kind.ToString();
+        }
+
+        string INumExprVisitor<string>.VisitConst(NumConstExpr numConstExpr)
+        {
+            return numConstExpr.Value.ToString();
+        }
+
+        string INumExprVisitor<string>.VisitVar(NumVarExpr numVarExpr)
+        {
+            return numVarExpr.Name;
+        }
+    }
+
+    class NumExprStringCollector : INumExprVisitor<string>
+    {
+        public static readonly NumExprStringCollector Instance = new NumExprStringCollector();
+
+        static readonly Dictionary<NumOp, int> _priorityByOp = new Dictionary<NumOp, int>()
+        {
+                { NumOp.Sum, 1 },
+                { NumOp.Sub, 1 },
+                { NumOp.Mul, 2 },
+                { NumOp.Div, 2 },
+            };
+
+        static readonly Dictionary<NumOp, string> _strByOp = new Dictionary<NumOp, string>()
+        {
+                { NumOp.Sum, "+" },
+                { NumOp.Sub, "-" },
+                { NumOp.Div, "/" },
+                { NumOp.Mul, "*" },
+            };
+
+        string GetChildStr(NumBinExpr curr, NumExpr child)
+        {
+            var bin = child as NumBinExpr;
+            string result;
+
+            if (bin != null && _priorityByOp[curr.Kind] > _priorityByOp[bin.Kind]) result = $"({child.Apply(this)})";
+            else result = child.Apply(this);
+
+            return result;
+        }
+
+        string INumExprVisitor<string>.VisitBinExpr(NumBinExpr curr)
+        {
+            return string.Join(" ", this.GetChildStr(curr, curr.Left), _strByOp[curr.Kind], this.GetChildStr(curr, curr.Right));
+        }
+
+        string INumExprVisitor<string>.VisitConst(NumConstExpr numConstExpr)
+        {
+            return numConstExpr.Value.ToString();
+        }
+
+        string INumExprVisitor<string>.VisitVar(NumVarExpr numVarExpr)
+        {
+            return numVarExpr.Name;
+        }
+    }
 }

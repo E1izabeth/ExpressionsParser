@@ -42,16 +42,32 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Automaton\DfaFsmRunner.cs" />
+    <Compile Include="Automaton\ExprFsmBuilder.cs" />
+    <Compile Include="Automaton\Extensions.cs" />
+    <Compile Include="Automaton\NfaFsmRunner.cs" />
+    <Compile Include="Automaton\Fsms.cs" />
+    <Compile Include="Automaton\FsmTransitionCondition.cs" />
+    <Compile Include="Automaton\Interfaces.cs" />
     <Compile Include="Expr.cs" />
     <Compile Include="ExprGenerator.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="UtilExtensions.cs" />
+    <Compile Include="Automaton\Fsm.cs" />
     <Compile Include="NumExpr.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegexParser.cs" />
+    <Compile Include="XmlGraph\Dgml.cs">
+      <DependentUpon>Dgml.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="XmlGraph\XmlGraph.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="XmlGraph\Dgml.xsd">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
