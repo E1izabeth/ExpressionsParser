@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using ParsingExpression.RulesTree;
 
 namespace ParsingExpression
 {
@@ -118,7 +119,7 @@ namespace ParsingExpression
             Token[] tokens;
 
             if (this.TryTokenize(pattern, out tokens))
-             {
+            {
                 expr = this.ParseImpl(tokens, 0, tokens.Length - 1);
             }
             else
@@ -127,6 +128,22 @@ namespace ParsingExpression
             }
 
             return expr != null;
+        }
+
+        public bool TryParse(string pattern, out Grammar grammar)
+        {
+            Token[] tokens;
+
+            if (this.TryTokenize(pattern, out tokens))
+            {
+                grammar = this.ParseImpl(tokens, 0, tokens.Length - 1);
+            }
+            else
+            {
+                grammar = null;
+            }
+
+            return grammar != null;
         }
 
         void ParseQuantifier(string str, ref int min, ref int max)
@@ -214,6 +231,12 @@ namespace ParsingExpression
             else
                 escape = Expr.Characters(t.str[1].ToString());
             return escape;
+        }
+        
+        //TODO: ParseImpl
+        Grammar ParseImpl()
+        {
+            return new Grammar();
         }
 
         Expr ParseImpl(Token[] tokens, int from, int to)
@@ -377,5 +400,7 @@ namespace ParsingExpression
 
             return classExpr;
         }
+
+
     }
 }

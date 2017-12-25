@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Xml.Serialization;
 using ParsingExpression.Automaton;
+using ParsingExpression.RulesTree;
 
 namespace ParsingExpression
 {
@@ -14,14 +15,18 @@ namespace ParsingExpression
     {
         static void Main()
         {
-            // regex: ababab
-            // text: ab
-
             var p = new RegexParser();
-            string regexp = @"a&(b)(d)";
-            // string regexp = @"a*";
-            //string regexp = @"(b|(bxy)|(bxy)|c)*n(k|l)+b?";
+            string regexp = @"a[a-z]c&(d)(dd)";
+            string str = @"abcdd";
             p.TryParse(regexp, out Expr expr);
+
+            //p.TryParse(regexp, out Grammar grammar);
+            bool IsMatched = false;
+            var st = ParsingState.MakeInitial(str);
+            var result = expr.Match(st); //var result = grammar.Match(st);
+            if (result.LastMatchSuccessed && result.Pos == result.Text.Length)
+                IsMatched = true;
+            Console.WriteLine("\tResult {0} for \"{1}\"",IsMatched, str);
 
             Console.WriteLine(expr.CollectTree(
                 e => e.GetItems(),
@@ -50,7 +55,14 @@ namespace ParsingExpression
             var fsm3 = fsm2.MakeDFA();
             fsm3.SaveGraphToFile(@"c:\temp\out3.dgml");
 
-            string text = "aaaaaaaaaaaaaaaaaaaaaab";
+            string text = "abcdd";
+            var runner = Fsms.MakeFsmRunner(expr, FsmRunnerMode.DFA);
+            var ans = runner.IsMatch(text);
+
+            runner = Fsms.MakeFsmRunner(expr, FsmRunnerMode.NFA);
+            ans = runner.IsMatch(text);
+
+
             int position = 0;
             var r = expr.Match(text, ref position);
             Console.WriteLine(r);

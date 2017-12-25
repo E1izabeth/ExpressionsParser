@@ -71,7 +71,7 @@ namespace ParsingExpression.Automaton
                         newState.SetFinal();
 
                     group.oldStates.SelectMany(s => s.OutTransitions)
-                         .GroupBy(t => t.Condition.Character)
+                         .GroupBy(t => t.Condition)
                          .Select(g => new StatesGroup(g.Select(t => t.To).ToArray()))
                          .ForEach(g => groupsToHandle.Enqueue(g));
                 }
@@ -101,12 +101,12 @@ namespace ParsingExpression.Automaton
             {
                 visitedStates.Clear();
 
-                if (fsm.InitialState == st || st.InTransitions.Any(t => !t.IsSigmaTransition()))
+                if (fsm.InitialState == st || st.InTransitions.Any(t => !t.Condition.IsSigma))
                 {
                     var newState = newFsm.CreateState();
                     newStateByOldId[st.Id] = newState;
 
-                    if (st.Flatten(s => s.OutTransitions.Where(t => t.IsSigmaTransition()).Select(t => t.To), visitedStates.Add).Any(s => s.IsFinal))
+                    if (st.Flatten(s => s.OutTransitions.Where(t => t.Condition.IsSigma).Select(t => t.To), visitedStates.Add).Any(s => s.IsFinal))
                         newState.SetFinal();
                 }
             }
@@ -122,7 +122,7 @@ namespace ParsingExpression.Automaton
                 {
                     foreach (var t in fsm.States[oldStateId].OutTransitions)
                     {
-                        if (!t.IsSigmaTransition())
+                        if (!t.Condition.IsSigma)
                         {
                             newFsm.CreateTransition(newStateByOldId[oldStateId], newStateByOldId[t.To.Id], t.Condition);
                             // newFsm.CreateTransition(newStateByOldId[oldStateId], newStateByOldId.Where(l => l != null).Single(k => t.To.Id == k.Id), t.Character, null);
@@ -130,8 +130,8 @@ namespace ParsingExpression.Automaton
                         else
                         {
                             visitedTransitions.Clear();
-                            t.Flatten(ct => ct.To.OutTransitions.Where(nt => nt.IsSigmaTransition() && ct.To != t.From), tt => visitedTransitions.Add(tt.ToString()))
-                             .SelectMany(ct => ct.To.OutTransitions.Where(nt => !nt.IsSigmaTransition()))
+                            t.Flatten(ct => ct.To.OutTransitions.Where(nt => nt.Condition.IsSigma && ct.To != t.From), tt => visitedTransitions.Add(tt.ToString()))
+                             .SelectMany(ct => ct.To.OutTransitions.Where(nt => !nt.Condition.IsSigma))
                              .ForEach(ct => newFsm.CreateTransition(newStateByOldId[oldStateId], newStateByOldId[ct.To.Id], ct.Condition));
                         }
                     }
@@ -139,11 +139,6 @@ namespace ParsingExpression.Automaton
             }
 
             return newFsm;
-        }
-
-        public static bool IsSigmaTransition(this IFsmTransition nt)
-        {
-            return !nt.Condition.Character.HasValue && nt.Condition.ClassTestOrNull == null && nt.Condition.CheckFsmOrNull == null;
         }
 
         public static XmlGraph.XmlGraph BuildGraph(this IFsm fsm)

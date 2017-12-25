@@ -45,6 +45,7 @@
     <Compile Include="Automaton\DfaFsmRunner.cs" />
     <Compile Include="Automaton\ExprFsmBuilder.cs" />
     <Compile Include="Automaton\Extensions.cs" />
+    <Compile Include="Automaton\FsmRunnerBase.cs" />
     <Compile Include="Automaton\NfaFsmRunner.cs" />
     <Compile Include="Automaton\Fsms.cs" />
     <Compile Include="Automaton\FsmTransitionCondition.cs" />
@@ -52,6 +53,9 @@
     <Compile Include="Expr.cs" />
     <Compile Include="ExprGenerator.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="RulesTree\Grammar.cs" />
+    <Compile Include="RulesTree\Interfaces.cs" />
+    <Compile Include="RulesTree\States.cs" />
     <Compile Include="UtilExtensions.cs" />
     <Compile Include="Automaton\Fsm.cs" />
     <Compile Include="NumExpr.cs" />

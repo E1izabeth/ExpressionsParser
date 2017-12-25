@@ -38,10 +38,8 @@ namespace ParsingExpression.Automaton
             foreach (var elem in alternativesExpr.Items)
             {
                 var fragment = elem.Apply(this);
-                FsmTransitionCondition condition1 = new FsmTransitionCondition(null, null, null, false);
-                FsmTransitionCondition condition2 = new FsmTransitionCondition(null, null, null, false);
-                _fsm.CreateTransition(from, fragment.From, condition1);
-                _fsm.CreateTransition(fragment.To, to, condition2);
+                _fsm.CreateTransition(from, fragment.From, FsmTransitionCondition.EmptyCondition);
+                _fsm.CreateTransition(fragment.To, to, FsmTransitionCondition.EmptyCondition);
             }
 
             return new FsmFragment(from, to);
@@ -81,7 +79,6 @@ namespace ParsingExpression.Automaton
             var from = _fsm.CreateState();
             var to = _fsm.CreateState();
 
-            // TODO: uncomment
             _fsm.CreateTransition(from, to, new FsmTransitionCondition(null, null, childFsm, true));
 
             return new FsmFragment(from, to);
@@ -89,7 +86,14 @@ namespace ParsingExpression.Automaton
 
         FsmFragment IExprVisitor<FsmFragment>.VisitCheckNot(CheckNot checkNot)
         {
-            throw new NotImplementedException(); // TODO
+            var childFsm = _checkerFsmBuilder(checkNot.Child);
+
+            var from = _fsm.CreateState();
+            var to = _fsm.CreateState();
+
+            _fsm.CreateTransition(from, to, new FsmTransitionCondition(null, null, childFsm, false));
+
+            return new FsmFragment(from, to);
         }
 
         FsmFragment IExprVisitor<FsmFragment>.VisitNum(NumberExpr numExpr)
@@ -104,35 +108,35 @@ namespace ParsingExpression.Automaton
 
             if (numExpr.Min == 0)
             {
-                _fsm.CreateTransition(from, last, null);
+                _fsm.CreateTransition(from, last, FsmTransitionCondition.EmptyCondition);
                 if(numExpr.Max != 1)
-                    _fsm.CreateTransition(last, from, null);
+                    _fsm.CreateTransition(last, from, FsmTransitionCondition.EmptyCondition);
             }
             else
             {
                 for (int i = 0; i < numExpr.Min-1; i++)
                 {
                     numItem = numExpr.Child.Apply(this);
-                    _fsm.CreateTransition(prevTo, numItem.From, null);
+                    _fsm.CreateTransition(prevTo, numItem.From, FsmTransitionCondition.EmptyCondition);
                     prevTo = numItem.To;
                 }
                 var s = prevTo;
                 last = _fsm.CreateState();
                 if (numExpr.Max >= int.MaxValue)
                 {
-                    _fsm.CreateTransition(prevTo, last, null);
-                    _fsm.CreateTransition(prevTo, numItem.From, null);
+                    _fsm.CreateTransition(prevTo, last, FsmTransitionCondition.EmptyCondition);
+                    _fsm.CreateTransition(prevTo, numItem.From, FsmTransitionCondition.EmptyCondition);
                 }
                 else
                 {
                     for (int i = numExpr.Min; i < numExpr.Max; i++)
                     {
                         numItem = numExpr.Child.Apply(this);
-                        _fsm.CreateTransition(prevTo, numItem.From, null);
+                        _fsm.CreateTransition(prevTo, numItem.From, FsmTransitionCondition.EmptyCondition);
                         prevTo = numItem.To;
-                        _fsm.CreateTransition(prevTo, last, null);
+                        _fsm.CreateTransition(prevTo, last, FsmTransitionCondition.EmptyCondition);
                     }
-                    _fsm.CreateTransition(s, last, null);
+                    _fsm.CreateTransition(s, last, FsmTransitionCondition.EmptyCondition);
                 }
             }
             
@@ -148,9 +152,7 @@ namespace ParsingExpression.Automaton
             for (int i = 1; i < sequenceExpr.Items.Count; i++)
             {
                 seqItem = sequenceExpr.Items[i].Apply(this);
-
-                FsmTransitionCondition condition = new FsmTransitionCondition(null, null, null, false);
-                _fsm.CreateTransition(prevTo, seqItem.From, condition);
+                _fsm.CreateTransition(prevTo, seqItem.From, FsmTransitionCondition.EmptyCondition);
                 prevTo = seqItem.To;
             }
 
@@ -169,6 +171,11 @@ namespace ParsingExpression.Automaton
             fsmFragment.To.SetFinal();
 
             return fsm;
+        }
+
+        public FsmFragment VisitRuleCall(IExprVisitor<FsmFragment> visitor)
+        {
+            return visitor.VisitRuleCall(visitor);
         }
     }
 }

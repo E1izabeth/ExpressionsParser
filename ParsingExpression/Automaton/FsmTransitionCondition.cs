@@ -9,6 +9,8 @@ namespace ParsingExpression.Automaton
 
     class FsmTransitionCondition : IFsmTransitionCondition, IComparable<IFsmTransitionCondition>
     {
+        public static readonly FsmTransitionCondition EmptyCondition = new FsmTransitionCondition(null, null, null, false);
+
         public char? Character { get; private set; }
 
         public Func<char, bool> ClassTestOrNull { get; private set; }
@@ -17,9 +19,9 @@ namespace ParsingExpression.Automaton
 
         public bool CheckCondition { get; private set; }
 
-        public bool IsSigmaTransition
+        public bool IsSigma
         {
-            get { return !this.Character.HasValue && this.ClassTestOrNull != null && this.CheckCondition == true; }
+            get { return !this.Character.HasValue && this.ClassTestOrNull == null && this.CheckCondition != true; }
         }
 
         public FsmTransitionCondition(char? character, Func<char, bool> classTestOrNull, IFsm checkFsmOrNull, bool checkCondition)
@@ -37,12 +39,36 @@ namespace ParsingExpression.Automaton
 
         public int CompareTo(IFsmTransitionCondition other)
         {
-            return (this.Character == other.Character && this.CheckCondition == other.CheckCondition && this.CheckFsmOrNull == other.CheckFsmOrNull && this.ClassTestOrNull == other.ClassTestOrNull)? 1: 0;
+            return (this.Character == other.Character && this.CheckCondition == other.CheckCondition && this.CheckFsmOrNull == other.CheckFsmOrNull && this.ClassTestOrNull == other.ClassTestOrNull) ? 1 : 0;
         }
 
         public override bool Equals(object obj)
         {
             return base.Equals(obj);
+        }
+
+        public override string ToString()
+        {
+            string str;
+
+            if (this.CheckFsmOrNull != null)
+            {
+                str = "<CheckExpr>";
+            }
+            else if (this.ClassTestOrNull != null)
+            {
+                str = "<CharClass>";
+            }
+            else if (this.Character.HasValue)
+            {
+                str = "<" + this.Character.Value + ">";
+            }
+            else
+            {
+                str = "<Sigma>";
+            }
+
+            return str;
         }
     }
 }

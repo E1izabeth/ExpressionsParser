@@ -62,6 +62,6 @@ namespace ParsingExpression.Automaton
         IFsm CheckFsmOrNull { get; }
         bool CheckCondition { get; }
 
-        bool IsSigmaTransition { get; }
+        bool IsSigma { get; }
     }
 }

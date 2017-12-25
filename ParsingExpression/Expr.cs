@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using ParsingExpression.RulesTree;
 
 namespace ParsingExpression
 {
@@ -15,11 +16,20 @@ namespace ParsingExpression
         T VisitNum(NumberExpr numberExpr);
         T VisitCheck(Check check);
         T VisitCheckNot(CheckNot checkNot);
+        T VisitRuleCall(IExprVisitor<T> visitor);
     }
 
     public abstract class Expr
     {
         public abstract override string ToString();
+
+        public ParsingState Match(ParsingState st)
+        {
+            Console.WriteLine("Trying to match {0} at {1} for {2}", this, st.Pos, st.Pos < st.Text.Length ? st.Text[st.Pos].ToString() : "<EOT>");
+            var resultState = this.MatchImpl(st);
+            Console.WriteLine("{0} {1} at {2} ", resultState.LastMatchSuccessed ? "OK" : "FAIL", this, resultState.Pos);
+            return resultState;
+        }
 
         public bool Match(string text, ref int pos)
         {
@@ -30,6 +40,7 @@ namespace ParsingExpression
         }
 
         protected abstract bool MatchImpl(string text, ref int pos);
+        protected abstract ParsingState MatchImpl(ParsingState st);
 
         public T Apply<T>(IExprVisitor<T> visitor)
         {
@@ -56,6 +67,37 @@ namespace ParsingExpression
         public static Expr Alternatives(params Expr[] args) { return new AlternativesExpr(args); }
         public static Expr Check(Expr child) { return new Check(child); }
         public static Expr CheckNot(Expr child) { return new CheckNot(child); }
+        public static Expr RuleCall(string ruleName) { return new RuleCallExpr(ruleName); }
+    }
+
+    public class RuleCallExpr : Expr
+    {
+        public string RuleName { get; private set; }
+
+        public RuleCallExpr(string ruleName)
+        {
+            this.RuleName = ruleName;
+        }
+
+        protected override T ApplyImpl<T>(IExprVisitor<T> visitor)
+        {
+            return visitor.VisitRuleCall(visitor);
+        }
+
+        public override string ToString()
+        {
+            return "$" + this.RuleName;
+        }
+
+        protected override ParsingState MatchImpl(ParsingState st)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override bool MatchImpl(string text, ref int pos)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     // quantor
@@ -87,8 +129,7 @@ namespace ParsingExpression
         {
             if (pos >= text.Length)
                 return false;
-
-            //if (text[pos].GetHashCode() >= this._str[0] && text[pos].GetHashCode() <= this._str[3].GetHashCode())
+            
             if (this.ClassTest(text[pos]))
             {
                 ++pos;
@@ -100,6 +141,18 @@ namespace ParsingExpression
         protected override T ApplyImpl<T>(IExprVisitor<T> visitor)
         {
             return visitor.VisitCharClass(this);
+        }
+
+        protected override ParsingState MatchImpl(ParsingState st)
+        {
+            if (st.Pos >= st.Text.Length)
+                return st.ExprMatchFail(0);
+           
+            if (this.ClassTest(st.Text[st.Pos]))
+            {
+                return st.ExprMatchSuccess(1);
+            }
+            return st.ExprMatchFail(0);
         }
     }
 
@@ -139,6 +192,25 @@ namespace ParsingExpression
         protected override T ApplyImpl<T>(IExprVisitor<T> visitor)
         {
             return visitor.VisitChars(this);
+        }
+
+        protected override ParsingState MatchImpl(ParsingState st)
+        {
+            int startPos = st.Pos;
+            if (st.Pos + this.Chars.Length > st.Text.Length)
+                return st.ExprMatchFail(0);
+
+            int j = st.Pos;
+
+            for (int i = 0; i < this.Chars.Length; i++)
+            {
+                if (st.Text[j] != this.Chars[i])
+                    return st.ExprMatchFail(0);
+
+                ++j;
+            }
+
+            return st.ExprMatchSuccess(j - startPos);
         }
     }
 
@@ -195,6 +267,18 @@ namespace ParsingExpression
 
             return true;
         }
+
+        protected override ParsingState MatchImpl(ParsingState st)
+        {
+            //int startPos = st.Pos;
+            foreach (var item in this.Items)
+            {
+                st = item.Match(st);
+                if (!st.LastMatchSuccessed)
+                    return st.ExprMatchFail(0);
+            }
+            return st.ExprMatchSuccess(0);
+        }
     }
 
     public class AlternativesExpr : ItemsExpr
@@ -225,6 +309,19 @@ namespace ParsingExpression
             }
 
             return false;
+        }
+
+        protected override ParsingState MatchImpl(ParsingState st)
+        {
+            int startPos = st.Pos;
+            foreach (var item in this.Items)
+            {
+                st = item.Match(st);
+                if (st.LastMatchSuccessed)
+                    return st.ExprMatchSuccess(0);
+            }
+
+            return st.ExprMatchFail(st.Pos - startPos);
         }
     }
 
@@ -279,6 +376,23 @@ namespace ParsingExpression
         {
             return visitor.VisitNum(this);
         }
+
+        protected override ParsingState MatchImpl(ParsingState st)
+        {
+            int count = 0;
+            int startPos = st.Pos;
+            for (; count < this.Max; ++count)
+            {
+                st = this.Child.Match(st);
+                if (!st.LastMatchSuccessed)
+                    break;
+            }
+
+            if (count >= this.Min && count <= this.Max)
+                return st.ExprMatchSuccess(0);
+            else
+                return st.ExprMatchFail(0);
+        }
     }
 
     public class Check : ItemExpr
@@ -300,6 +414,15 @@ namespace ParsingExpression
         {
             var curr = pos;
             return this.Child.Match(text, ref curr);
+        }
+
+        protected override ParsingState MatchImpl(ParsingState st)
+        {
+            int pos = st.Pos;
+            if (this.Child.Match(st).LastMatchSuccessed)
+                return st.ExprMatchSuccess(pos - st.Pos);
+            else
+                return st.ExprMatchFail(st.Pos - pos);
         }
     }
 
@@ -323,11 +446,20 @@ namespace ParsingExpression
             var curr = pos;
             return !this.Child.Match(text, ref curr);
         }
+
+        protected override ParsingState MatchImpl(ParsingState st)
+        {
+            int pos = st.Pos;
+            if (this.Child.Match(st).LastMatchSuccessed)
+                return st.ExprMatchFail(pos - st.Pos);
+            else
+                return st.ExprMatchSuccess(st.Pos - pos);
+        }
     }
 
     public static class ExprExtensions
     {
-        public static IEnumerable<Expr>  GetItems(this Expr expr)
+        public static IEnumerable<Expr> GetItems(this Expr expr)
         {
             var itemsExpr = expr as ItemsExpr;
             var itemExpr = expr as ItemExpr;
