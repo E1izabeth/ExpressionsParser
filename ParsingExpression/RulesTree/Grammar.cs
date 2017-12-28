@@ -11,16 +11,25 @@ namespace ParsingExpression.RulesTree
     {
         readonly Rule _rootRule;
 
-        public Rule RootRule { get { return _rootRule; } }
+        //public Rule RootRule { get { return _rootRule; } }
 
-        readonly List<Rule> _rules;
-        public IReadOnlyCollection<Rule> Rules { get; private set; }
+        readonly Dictionary<string, Rule> _rulesByName;
+
+        // readonly List<Rule> _rules;
+        // public IReadOnlyCollection<Rule> Rules { get; private set; }
 
         public Grammar(params Rule[] rules)
         {
             _rootRule = rules.First();
-            _rules = rules.ToList();
-            this.Rules = new ReadOnlyCollection<Rule>(_rules);
-        }      
+            _rulesByName = rules.ToDictionary(r => r.Name);
+            
+            // _rules = rules.ToList();
+            // this.Rules = new ReadOnlyCollection<Rule>(_rules);
+        }
+
+        public IParsingResult Parse(string text)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

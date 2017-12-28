@@ -53,6 +53,7 @@
     <Compile Include="Expr.cs" />
     <Compile Include="ExprGenerator.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="RulesTree\ExprTreeRunner.cs" />
     <Compile Include="RulesTree\Grammar.cs" />
     <Compile Include="RulesTree\Interfaces.cs" />
     <Compile Include="RulesTree\States.cs" />

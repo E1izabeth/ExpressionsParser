@@ -25,9 +25,9 @@ namespace ParsingExpression
 
         public ParsingState Match(ParsingState st)
         {
-            Console.WriteLine("Trying to match {0} at {1} for {2}", this, st.Pos, st.Pos < st.Text.Length ? st.Text[st.Pos].ToString() : "<EOT>");
+            // Console.WriteLine("Trying to match {0} at {1} for {2}", this, st.Pos, st.Pos < st.Text.Length ? st.Text[st.Pos].ToString() : "<EOT>");
             var resultState = this.MatchImpl(st);
-            Console.WriteLine("{0} {1} at {2} ", resultState.LastMatchSuccessed ? "OK" : "FAIL", this, resultState.Pos);
+            // Console.WriteLine("{0} {1} at {2} ", resultState.LastMatchSuccessed ? "OK" : "FAIL", this, resultState.Pos);
             return resultState;
         }
 

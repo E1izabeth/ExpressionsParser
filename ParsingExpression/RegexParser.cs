@@ -130,21 +130,21 @@ namespace ParsingExpression
             return expr != null;
         }
 
-        public bool TryParse(string pattern, out Grammar grammar)
-        {
-            Token[] tokens;
+        //public bool TryParse(string pattern, out Grammar grammar)
+        //{
+        //    Token[] tokens;
 
-            if (this.TryTokenize(pattern, out tokens))
-            {
-                grammar = this.ParseImpl(tokens, 0, tokens.Length - 1);
-            }
-            else
-            {
-                grammar = null;
-            }
+        //    if (this.TryTokenize(pattern, out tokens))
+        //    {
+        //        grammar = this.ParseImpl(tokens, 0, tokens.Length - 1);
+        //    }
+        //    else
+        //    {
+        //        grammar = null;
+        //    }
 
-            return grammar != null;
-        }
+        //    return grammar != null;
+        //}
 
         void ParseQuantifier(string str, ref int min, ref int max)
         {
@@ -400,7 +400,5 @@ namespace ParsingExpression
 
             return classExpr;
         }
-
-
     }
 }

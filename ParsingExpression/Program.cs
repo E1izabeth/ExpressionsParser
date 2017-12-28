@@ -16,13 +16,19 @@ namespace ParsingExpression
         static void Main()
         {
             var p = new RegexParser();
-            string regexp = @"a[a-z]c&(d)(dd)";
-            string str = @"abcdd";
+            string regexp = @"a(a|ba)";
+            string str = "aba";
             p.TryParse(regexp, out Expr expr);
 
+
+            ExprTreeRunner treeRunner = new ExprTreeRunner(expr);
+            var matchecd = treeRunner.IsMatch(str);
+            
             //p.TryParse(regexp, out Grammar grammar);
             bool IsMatched = false;
-            var st = ParsingState.MakeInitial(str);
+            var st = ParsingState.MakeInitial(str, expr);
+
+
             var result = expr.Match(st); //var result = grammar.Match(st);
             if (result.LastMatchSuccessed && result.Pos == result.Text.Length)
                 IsMatched = true;
