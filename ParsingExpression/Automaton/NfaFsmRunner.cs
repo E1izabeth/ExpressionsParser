@@ -16,45 +16,90 @@ namespace ParsingExpression.Automaton
             _fsm = fsm;
         }
 
+        //TODO:
+        // delayed.Push(Tuple.Create(tmpState, pos));
         public bool IsMatch(string text)
         {
-            var tmpState = _fsm.InitialState;
+            var currState = _fsm.InitialState;
             int pos = 0;
-            return IsMatch(text, ref pos, ref tmpState);
+            return IsMatch(text, ref pos, ref currState);
         }
+        //    //int nextEdge = 0;
+        //    var delayed = new Stack<Tuple<IFsmState, int>>();
+        //    while (currState.IsFinal == false || pos == text.Length)
+        //    {
+        //        var visitedTransitions = new SortedSet<string>();
+
+        //        var transitions = currState.Flatten(s => s.OutTransitions.Where(nt => nt.Condition.IsSigma).Select(x => x.To), tt => visitedTransitions.Add(tt.ToString()))
+        //            .SelectMany(ct => ct.OutTransitions.Where(nt => !nt.Condition.IsSigma));
+
+        //        delayed.Push(Tuple.Create(currState, pos));
+
+        //        foreach (var transition in transitions)
+        //        {
+        //            bool edge = MatchEdge(text, pos, transition);
+        //            if (edge)
+        //            {
+        //                currState = transition.To;
+        //                pos++;
+        //                break;
+        //            }
+        //            else
+        //            {
+        //                if (delayed.Count > 0)
+        //                {
+        //                    var retState = delayed.Pop();
+        //                    currState = retState.Item1;
+        //                    pos = retState.Item2;
+        //                    //nextEdge = retState.Item3;
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return currState.IsFinal;
+        //}
 
         private bool IsMatch(string text, ref int pos, ref IFsmState tmpState)
         {
             if (tmpState.IsFinal)
                 return true;
+            var delayed = new Stack<Tuple<IFsmState, int>>();
 
-            while (!tmpState.IsFinal || pos == text.Length)
+            while (tmpState.IsFinal == false || pos != text.Length)
             {
+
                 var visitedTransitions = new SortedSet<string>();
 
                 var transitions = tmpState.Flatten(s => s.OutTransitions.Where(nt => nt.Condition.IsSigma).Select(x => x.To), tt => visitedTransitions.Add(tt.ToString()))
                     .SelectMany(ct => ct.OutTransitions.Where(nt => !nt.Condition.IsSigma));
 
+                if (tmpState.OutTransitions.Any(t => t.Condition.IsSigma))
+                {
+                    delayed.Push(Tuple.Create(tmpState, pos));
+                }
+
+                bool succ = false;
+
                 foreach (var transition in transitions)
                 {
-                    if (transition.To.Id == tmpState.Id)
-                        continue;
-                    bool edge = MatchEdge(text, pos, tmpState, transition);
+                    bool edge = MatchEdge(text, pos, transition);
                     if (edge)
                     {
                         tmpState = transition.To;
                         pos++;
+                        succ = true;
+                        break;
                     }
+                }
 
-                    if (edge == true && tmpState.IsFinal && pos == text.Length)
-                        return true;
-                    if (edge == true && tmpState.Id != transition.From.Id)
-                        IsMatch(text, ref pos, ref tmpState);
-                    if (tmpState.IsFinal && pos == text.Length)
-                        return true;
+                if (!succ)
+                {
+                    var backState = delayed.Pop();
+                    tmpState = backState.Item1;
+                    pos = backState.Item2;
                 }
             }
-            return false;
+            return tmpState.IsFinal;
         }
     }
 }

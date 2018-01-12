@@ -16,7 +16,9 @@ namespace ParsingExpression.Automaton
     {
         private static IFsm MakeNfa(Expr expr)
         {
-            return ExprFsmBuilder.BuildFsm(expr, MakeNfa);
+            var fsm = ExprFsmBuilder.BuildFsm(expr, MakeNfa);
+            fsm.SaveGraphToFile(@"c:\temp\out2.dgml");
+            return fsm;
         }
 
         private static IFsmRunner MakeNfaRunner(IFsm fsm)
@@ -29,6 +31,7 @@ namespace ParsingExpression.Automaton
             var fsm = ExprFsmBuilder.BuildFsm(expr, MakeDfa);
             var fsm2 = fsm.RemoveEmptyTransitions();
             var fsm3 = fsm2.MakeDFA();
+            // fsm3.SaveGraphToFile(@"c:\temp\out3.dgml");
             return fsm3;
         }
 

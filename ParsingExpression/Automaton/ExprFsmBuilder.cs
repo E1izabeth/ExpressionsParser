@@ -159,6 +159,11 @@ namespace ParsingExpression.Automaton
             return new FsmFragment(from, prevTo);
         }
 
+        FsmFragment IExprVisitor<FsmFragment>.VisitRuleCall(RuleCallExpr ruleCallExpr)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         public static IFsm BuildFsm(Expr expr, Func<Expr, IFsm> checkerFsmBuilder)
@@ -172,10 +177,6 @@ namespace ParsingExpression.Automaton
 
             return fsm;
         }
-
-        public FsmFragment VisitRuleCall(IExprVisitor<FsmFragment> visitor)
-        {
-            return visitor.VisitRuleCall(visitor);
-        }
+        
     }
 }

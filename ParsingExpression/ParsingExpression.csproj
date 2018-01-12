@@ -52,11 +52,15 @@
     <Compile Include="Automaton\Interfaces.cs" />
     <Compile Include="Expr.cs" />
     <Compile Include="ExprGenerator.cs" />
+    <Compile Include="ExprResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ExprResources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Extensions.cs" />
     <Compile Include="RulesTree\ExprTreeRunner.cs" />
-    <Compile Include="RulesTree\Grammar.cs" />
     <Compile Include="RulesTree\Interfaces.cs" />
-    <Compile Include="RulesTree\States.cs" />
+    <Compile Include="RulesTree\ParsingState.cs" />
     <Compile Include="UtilExtensions.cs" />
     <Compile Include="Automaton\Fsm.cs" />
     <Compile Include="NumExpr.cs" />
@@ -73,6 +77,15 @@
     <None Include="XmlGraph\Dgml.xsd">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ExprResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ExprResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\calc.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

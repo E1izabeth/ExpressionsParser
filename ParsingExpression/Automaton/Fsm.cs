@@ -19,6 +19,7 @@ namespace ParsingExpression.Automaton
             public int Id { get; private set; }
             public bool IsFinal { get; private set; }
             public bool IsDeleted { get; private set; }
+            
 
             readonly List<FsmTransition> _outTransitions = new List<FsmTransition>();
             readonly List<FsmTransition> _inTransitions = new List<FsmTransition>();
@@ -31,7 +32,7 @@ namespace ParsingExpression.Automaton
                 _owner = owner;
                 this.Id = id;
                 this.IsDeleted = false;
-
+                
                 this.InTransitions = new ReadOnlyCollection<FsmTransition>(_inTransitions);
                 this.OutTransitions = new ReadOnlyCollection<FsmTransition>(_outTransitions);
                 this.IsFinal = false;

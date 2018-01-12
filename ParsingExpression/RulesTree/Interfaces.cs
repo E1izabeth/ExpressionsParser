@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ParsingExpression.RulesTree
 {
-    interface IGrammar
+    public interface IGrammar
     {
         // IReadOnlyCollection<Rule> Rules { get; }
         // Rule RootRule { get; }
@@ -15,13 +15,13 @@ namespace ParsingExpression.RulesTree
         IParsingResult Parse(string text);
     }
 
-    interface IParsingResult
+    public interface IParsingResult
     {
         bool Success { get; }
 
     }
 
-    class StringTreeNode
+    public class StringTreeNode
     {
         public StringFragment Fragment { get; private set; }
         public ReadOnlyCollection<StringTreeNode> Children { get; private set; }
@@ -38,7 +38,7 @@ namespace ParsingExpression.RulesTree
         }
     }
 
-    struct StringFragment
+    public struct StringFragment
     {
         private readonly int _start, _length;
         private readonly string _text;

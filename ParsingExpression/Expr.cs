@@ -16,7 +16,7 @@ namespace ParsingExpression
         T VisitNum(NumberExpr numberExpr);
         T VisitCheck(Check check);
         T VisitCheckNot(CheckNot checkNot);
-        T VisitRuleCall(IExprVisitor<T> visitor);
+        T VisitRuleCall(RuleCallExpr ruleCallExpr);
     }
 
     public abstract class Expr
@@ -33,9 +33,9 @@ namespace ParsingExpression
 
         public bool Match(string text, ref int pos)
         {
-            Console.WriteLine("Trying to match {0} at {1} for {2}", this, pos, pos < text.Length ? text[pos].ToString() : "<EOT>");
+            //Console.WriteLine("Trying to match {0} at {1} for {2}", this, pos, pos < text.Length ? text[pos].ToString() : "<EOT>");
             var result = this.MatchImpl(text, ref pos);
-            Console.WriteLine("{0} {1} at {2} ", result ? "OK" : "FAIL", this, pos);
+            //Console.WriteLine("{0} {1} at {2} ", result ? "OK" : "FAIL", this, pos);
             return result;
         }
 
@@ -81,7 +81,7 @@ namespace ParsingExpression
 
         protected override T ApplyImpl<T>(IExprVisitor<T> visitor)
         {
-            return visitor.VisitRuleCall(visitor);
+            return visitor.VisitRuleCall(this);
         }
 
         public override string ToString()
@@ -146,13 +146,13 @@ namespace ParsingExpression
         protected override ParsingState MatchImpl(ParsingState st)
         {
             if (st.Pos >= st.Text.Length)
-                return st.ExprMatchFail(0);
+                return st.ExitChild(false);
            
             if (this.ClassTest(st.Text[st.Pos]))
             {
-                return st.ExprMatchSuccess(1);
+                return st.ExitChild(true, 1);
             }
-            return st.ExprMatchFail(0);
+            return st.ExitChild(false);
         }
     }
 
@@ -198,19 +198,19 @@ namespace ParsingExpression
         {
             int startPos = st.Pos;
             if (st.Pos + this.Chars.Length > st.Text.Length)
-                return st.ExprMatchFail(0);
+                return st.ExitChild(false);
 
             int j = st.Pos;
 
             for (int i = 0; i < this.Chars.Length; i++)
             {
                 if (st.Text[j] != this.Chars[i])
-                    return st.ExprMatchFail(0);
+                    return st.ExitChild(false);
 
                 ++j;
             }
 
-            return st.ExprMatchSuccess(j - startPos);
+            return st.ExitChild(true, j - startPos);
         }
     }
 
@@ -273,11 +273,11 @@ namespace ParsingExpression
             //int startPos = st.Pos;
             foreach (var item in this.Items)
             {
-                st = item.Match(st);
-                if (!st.LastMatchSuccessed)
-                    return st.ExprMatchFail(0);
+                st = item.Match(st.EnterChild(item));
+                if (st.LastMatchSuccessed == false)
+                    return st.ExitChild(false);
             }
-            return st.ExprMatchSuccess(0);
+            return st.ExitChild(true, 0);
         }
     }
 
@@ -316,12 +316,12 @@ namespace ParsingExpression
             int startPos = st.Pos;
             foreach (var item in this.Items)
             {
-                st = item.Match(st);
-                if (st.LastMatchSuccessed)
-                    return st.ExprMatchSuccess(0);
+                st = item.Match(st.EnterChild(item));
+                if (st.LastMatchSuccessed == true)
+                    return st.ExitChild(true);
             }
 
-            return st.ExprMatchFail(st.Pos - startPos);
+            return st.ExitChild(false, st.Pos - startPos);
         }
     }
 
@@ -362,6 +362,17 @@ namespace ParsingExpression
         protected override bool MatchImpl(string text, ref int pos)
         {
             int count = 0;
+
+            //for (; count < this.Min; ++count)
+            //    if (!this.Child.Match(text, ref pos))
+            //        return false;
+
+            //for (; count < this.Max; ++count)
+            //    if (!this.Child.Match(text, ref pos))
+            //        break;
+
+            //return tr;
+
             for (; count < this.Max; ++count)
                 if (!this.Child.Match(text, ref pos))
                     break;
@@ -383,15 +394,15 @@ namespace ParsingExpression
             int startPos = st.Pos;
             for (; count < this.Max; ++count)
             {
-                st = this.Child.Match(st);
-                if (!st.LastMatchSuccessed)
+                st = this.Child.Match(st.EnterChild(this.Child));
+                if (st.LastMatchSuccessed == false)
                     break;
             }
 
             if (count >= this.Min && count <= this.Max)
-                return st.ExprMatchSuccess(0);
+                return st.ExitChild(true);
             else
-                return st.ExprMatchFail(0);
+                return st.ExitChild(false);
         }
     }
 
@@ -418,11 +429,14 @@ namespace ParsingExpression
 
         protected override ParsingState MatchImpl(ParsingState st)
         {
-            int pos = st.Pos;
-            if (this.Child.Match(st).LastMatchSuccessed)
-                return st.ExprMatchSuccess(pos - st.Pos);
-            else
-                return st.ExprMatchFail(st.Pos - pos);
+        //    int pos = st.Pos;
+        //    if (this.Child.Match(st.EnterChild(this.Child)).LastMatchSuccessed == true)
+        //        return st.ExitChild(true, pos - st.Pos);
+        //    else
+        //        return st.ExitChild(false, st.Pos - pos);
+
+            var newState = this.Child.Match(st.EnterChild(this.Child));
+            return newState.ExitChild(newState.LastMatchSuccessed.Value, -(newState.Pos - st.Pos));
         }
     }
 
@@ -449,11 +463,14 @@ namespace ParsingExpression
 
         protected override ParsingState MatchImpl(ParsingState st)
         {
-            int pos = st.Pos;
-            if (this.Child.Match(st).LastMatchSuccessed)
-                return st.ExprMatchFail(pos - st.Pos);
-            else
-                return st.ExprMatchSuccess(st.Pos - pos);
+            //int pos = st.Pos;
+            //if (this.Child.Match(st).LastMatchSuccessed == true)
+            //    return st.ExitChild(false, pos - st.Pos);
+            //else
+            //    return st.ExitChild(true, st.Pos - pos);
+
+            var newState = this.Child.Match(st.EnterChild(this.Child));
+            return newState.ExitChild(!newState.LastMatchSuccessed.Value, -(newState.Pos - st.Pos));
         }
     }
 

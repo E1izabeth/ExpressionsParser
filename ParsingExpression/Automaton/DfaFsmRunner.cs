@@ -18,6 +18,33 @@ namespace ParsingExpression.Automaton
 
         public bool IsMatch(string text)
         {
+            var currState = _fsm.InitialState;
+            int pos = 0;
+
+            while (!currState.IsFinal || pos == text.Length)
+            {
+                var activeTransitions = currState.OutTransitions.Where(t => MatchEdge(text, pos, t)).ToArray();
+
+                if (activeTransitions.Length == 0)
+                {
+                    break;
+                }
+                else if (activeTransitions.Length == 1)
+                {
+                    currState = activeTransitions.First().To;
+                    pos++;
+                }
+                else
+                {
+                    throw new InvalidOperationException("bad fsm");
+                }
+            }
+
+            return currState.IsFinal;
+        }
+
+        /*public bool IsMatch(string text)
+        {
             var tmpState = _fsm.InitialState;
             int pos = 0;
             return IsMatch(text, ref pos, ref tmpState);
@@ -30,7 +57,7 @@ namespace ParsingExpression.Automaton
 
             while (!tmpState.IsFinal || pos == text.Length)
             {
-                Console.WriteLine(tmpState.Id);
+                // Console.WriteLine(tmpState.Id);
                 foreach (var transition in tmpState.OutTransitions)
                 {
                     if (MatchEdge(text, pos, tmpState, transition))
@@ -38,8 +65,7 @@ namespace ParsingExpression.Automaton
                         tmpState = transition.To;
                         ++pos;
                     }
-
-
+                    
                     if (tmpState.IsFinal && pos == text.Length)
                         return true;
 
@@ -52,6 +78,6 @@ namespace ParsingExpression.Automaton
             }
 
             return false;
-        }
+        }*/
     }
 }

@@ -232,12 +232,6 @@ namespace ParsingExpression
                 escape = Expr.Characters(t.str[1].ToString());
             return escape;
         }
-        
-        //TODO: ParseImpl
-        Grammar ParseImpl()
-        {
-            return new Grammar();
-        }
 
         Expr ParseImpl(Token[] tokens, int from, int to)
         {
@@ -388,7 +382,7 @@ namespace ParsingExpression
                 }
             }
 
-            var classExpr = Expr.Alternatives(alts.ToArray());
+            var classExpr = alts.Count == 1 ? alts.First() : Expr.Alternatives(alts.ToArray());
 
             if (invertClass)
             {

@@ -34,17 +34,23 @@ namespace ParsingExpression.Automaton
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return this.Character.GetHashCode() ^ this.CheckCondition.GetHashCode() ^ (
+                this.ClassTestOrNull == null ? 1 : this.ClassTestOrNull.GetHashCode()
+            ) ^ (
+                this.CheckFsmOrNull == null ? 1 : this.CheckFsmOrNull.GetHashCode()
+            );
         }
 
         public int CompareTo(IFsmTransitionCondition other)
         {
-            return (this.Character == other.Character && this.CheckCondition == other.CheckCondition && this.CheckFsmOrNull == other.CheckFsmOrNull && this.ClassTestOrNull == other.ClassTestOrNull) ? 1 : 0;
+            var result = (this.Character == other.Character && this.CheckCondition == other.CheckCondition && this.CheckFsmOrNull == other.CheckFsmOrNull && this.ClassTestOrNull == other.ClassTestOrNull) ? 0 : 1;
+            return result;
         }
 
         public override bool Equals(object obj)
         {
-            return base.Equals(obj);
+            var other = obj as IFsmTransitionCondition;
+            return other == null ? false : this.CompareTo(other) == 0;
         }
 
         public override string ToString()

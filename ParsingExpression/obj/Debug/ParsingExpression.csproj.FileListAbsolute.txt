@@ -5,3 +5,5 @@ C:\Users\User\source\repos\ParsingExpression\ParsingExpression\obj\Debug\Parsing
 C:\Users\User\source\repos\ParsingExpression\ParsingExpression\obj\Debug\ParsingExpression.csproj.CoreCompileInputs.cache
 C:\Users\User\source\repos\ParsingExpression\ParsingExpression\obj\Debug\ParsingExpression.exe
 C:\Users\User\source\repos\ParsingExpression\ParsingExpression\obj\Debug\ParsingExpression.pdb
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression\obj\Debug\ParsingExpression.ExprResources.resources
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression\obj\Debug\ParsingExpression.csproj.GenerateResource.Cache

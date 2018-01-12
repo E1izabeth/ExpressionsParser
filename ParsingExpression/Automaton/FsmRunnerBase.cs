@@ -15,9 +15,9 @@ namespace ParsingExpression.Automaton
             _checkRunnerFabric = checkRunnerFabric;
         }
 
-        protected bool MatchEdge(string text, int pos, IFsmState tmpState, IFsmTransition transition)
+        protected bool MatchEdge(string text, int pos, IFsmTransition transition)
         {
-            Console.WriteLine("Trying to match '{0}' character at {1} against {2}", text[pos], pos, transition.Condition);
+            // Console.WriteLine("Trying to match '{0}' character at {1} against {2}", text[pos], pos, transition.Condition);
 
             bool ok;
 

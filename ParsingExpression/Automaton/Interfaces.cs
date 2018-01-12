@@ -32,9 +32,11 @@ namespace ParsingExpression.Automaton
 
         int Id { get; }
         bool IsFinal { get; }
+        
 
         IReadOnlyList<IFsmTransition> OutTransitions { get; }
         IReadOnlyList<IFsmTransition> InTransitions { get; }
+
 
         void SetFinal();
         void Delete();
