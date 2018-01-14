@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ParsingExpression.RulesTree
+namespace ParsingExpression.Trees
 {
     public interface IGrammar
     {
@@ -25,9 +25,11 @@ namespace ParsingExpression.RulesTree
     {
         public StringFragment Fragment { get; private set; }
         public ReadOnlyCollection<StringTreeNode> Children { get; private set; }
+        public Rule Rule { get; private set; }
 
-        public StringTreeNode(StringFragment fragment, params StringTreeNode[] children)
+        public StringTreeNode(Rule rule, StringFragment fragment, params StringTreeNode[] children)
         {
+            this.Rule = rule;
             this.Fragment = fragment;
             this.Children = new ReadOnlyCollection<StringTreeNode>(children);
         }

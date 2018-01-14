@@ -63,21 +63,20 @@ namespace ParsingExpression.Automaton
         {
             if (tmpState.IsFinal)
                 return true;
+
             var delayed = new Stack<Tuple<IFsmState, int>>();
 
             while (tmpState.IsFinal == false || pos != text.Length)
             {
+                if (tmpState.OutTransitions.Any(t => t.Condition.IsSigma))
+                    delayed.Push(Tuple.Create(tmpState, pos));
 
                 var visitedTransitions = new SortedSet<string>();
-
-                var transitions = tmpState.Flatten(s => s.OutTransitions.Where(nt => nt.Condition.IsSigma).Select(x => x.To), tt => visitedTransitions.Add(tt.ToString()))
-                    .SelectMany(ct => ct.OutTransitions.Where(nt => !nt.Condition.IsSigma));
-
-                if (tmpState.OutTransitions.Any(t => t.Condition.IsSigma))
-                {
-                    delayed.Push(Tuple.Create(tmpState, pos));
-                }
-
+                var transitions = tmpState.Flatten(
+                    s => s.OutTransitions.Where(nt => nt.Condition.IsSigma).Select(x => x.To), 
+                    tt => visitedTransitions.Add(tt.ToString())
+                ).SelectMany(ct => ct.OutTransitions.Where(nt => !nt.Condition.IsSigma));
+                
                 bool succ = false;
 
                 foreach (var transition in transitions)

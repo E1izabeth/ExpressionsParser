@@ -14,37 +14,6 @@ namespace ParsingExpression
 {
     class Program
     {
-        //static void Main()
-        //{   
-        //    var g = new Grammar(
-        //        new Rule("expr", Expr.Alternatives(Expr.RuleCall("sum"), Expr.RuleCall("product"), Expr.RuleCall("braces"), Expr.RuleCall("num"))),
-        //        new Rule("num", Expr.Number(Expr.CharsRange('0','9'),1,int.MaxValue)),
-        //        new Rule("braces", Expr.Sequence(Expr.Characters("("), Expr.RuleCall("expr") ,Expr.Characters(")"))),
-        //        new Rule("parg", Expr.Alternatives(Expr.RuleCall("braces"), Expr.RuleCall("num"))),
-        //        new Rule("product", Expr.Sequence(
-        //                                Expr.RuleCall("parg"),
-        //                                Expr.Number(Expr.Sequence(
-        //                                        Expr.RuleCall("productOp"),
-        //                                        Expr.RuleCall("parg")
-        //                                ), 1, int.MaxValue)
-        //                            )),
-        //        new Rule("productOp", Expr.Alternatives(Expr.Characters("*"), Expr.Characters("/"))),
-        //        new Rule("sarg", Expr.Alternatives(Expr.RuleCall("product"), Expr.RuleCall("braces"), Expr.RuleCall("num"))),
-        //        new Rule("sum", Expr.Sequence(
-        //                                Expr.RuleCall("sarg"),
-        //                                Expr.Number(Expr.Sequence(
-        //                                        Expr.RuleCall("sumOp"),
-        //                                        Expr.RuleCall("sarg")
-        //                                ), 1, int.MaxValue)
-        //                            )),
-        //        new Rule("sumOp", Expr.Alternatives(Expr.Characters("+"), Expr.Characters("-")))
-        //    );
-
-        //    var result = g.Parse("1+4+6*3");
-
-        //    Console.WriteLine(result);
-        //}
-
         static TimeSpan Measure(int count, Action act)
         {
             var sw = new Stopwatch();
@@ -61,7 +30,7 @@ namespace ParsingExpression
 
         static void Main()
         {
-            const int iterations = 100000;
+            const int iterations = 1000000;
             var p = new RegexParser();
             string regexp = @"a((b|c|[a-zA-Z])s*n|s*)b";
             //regexp = @"a(b|c|d)b";
@@ -194,10 +163,3 @@ namespace ParsingExpression
         }
     }
 }
-
-////@"^(?[\w\-]+\.)?
-////(?<name>[\w\-]+)
-////(\;((?<param>[\w\-]+)
-////(\=(?<pvalue>(\"[^\"]*\")|([^\"\;\:\,]*))
-////(\,(?<pvalue>(\"[^\"]*\")|([^\"\;\:\,]*)))?)?))*
-////:(?<value>.*)";

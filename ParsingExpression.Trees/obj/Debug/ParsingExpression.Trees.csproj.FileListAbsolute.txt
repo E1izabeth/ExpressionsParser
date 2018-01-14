@@ -1,0 +1,9 @@
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression.Trees\obj\Debug\ParsingExpression.Trees.csprojResolveAssemblyReference.cache
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression.Trees\obj\Debug\ParsingExpression.Trees.csproj.CoreCompileInputs.cache
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression.Trees\bin\Debug\ParsingExpression.Trees.exe.config
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression.Trees\bin\Debug\ParsingExpression.Trees.exe
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression.Trees\bin\Debug\ParsingExpression.Trees.pdb
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression.Trees\obj\Debug\ParsingExpression.Trees.exe
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression.Trees\obj\Debug\ParsingExpression.Trees.pdb
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression.Trees\bin\Debug\ParsingExpression.Common.dll
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression.Trees\bin\Debug\ParsingExpression.Common.pdb
