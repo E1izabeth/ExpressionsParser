@@ -7,3 +7,5 @@ C:\Users\User\source\repos\ParsingExpression\ParsingExpression\obj\Debug\Parsing
 C:\Users\User\source\repos\ParsingExpression\ParsingExpression\obj\Debug\ParsingExpression.pdb
 C:\Users\User\source\repos\ParsingExpression\ParsingExpression\obj\Debug\ParsingExpression.ExprResources.resources
 C:\Users\User\source\repos\ParsingExpression\ParsingExpression\obj\Debug\ParsingExpression.csproj.GenerateResource.Cache
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression\bin\Debug\ParsingExpression.Common.dll
+C:\Users\User\source\repos\ParsingExpression\ParsingExpression\bin\Debug\ParsingExpression.Common.pdb

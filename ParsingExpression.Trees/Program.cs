@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,8 +7,18 @@ using System.Threading.Tasks;
 
 namespace ParsingExpression.Trees
 {
-    class Program
+    static class Program
     {
+        static IEnumerable<IParsingTreeNode<T>> GetChildren<T>(this IParsingTreeNode<T> node)
+        {
+            var child = node.Child;
+            while (child != null)
+            {
+                yield return child;
+                child = child.NextChild;
+            }
+        }
+
         static void Main()
         {
             var g = new Grammar(
@@ -36,9 +47,14 @@ namespace ParsingExpression.Trees
                 new Rule("sumOp", Expr.Alternatives(Expr.Characters("+"), Expr.Characters("-")))
             );
 
-            var result = g.Parse("4341+54+6*3");
+            var text = "4341+54+6*3";
+            //var result = g.Parse(text);
 
-            Console.WriteLine(result);
+            var runner = new GrammarRunner(g);
+            var result = runner.Match(text);
+
+            var str = result.CollectTree(n => n.GetChildren(), n => n.Info.ToString());
+            Console.WriteLine(str);
         }
 
 
