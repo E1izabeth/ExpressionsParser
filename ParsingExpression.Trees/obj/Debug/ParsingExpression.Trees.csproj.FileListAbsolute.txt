@@ -7,3 +7,13 @@ C:\Users\User\source\repos\ParsingExpression\ParsingExpression.Trees\obj\Debug\P
 C:\Users\User\source\repos\ParsingExpression\ParsingExpression.Trees\obj\Debug\ParsingExpression.Trees.pdb
 C:\Users\User\source\repos\ParsingExpression\ParsingExpression.Trees\bin\Debug\ParsingExpression.Common.dll
 C:\Users\User\source\repos\ParsingExpression\ParsingExpression.Trees\bin\Debug\ParsingExpression.Common.pdb
+D:\Projects\ExpressionsParser\ParsingExpression.Trees\bin\Debug\ParsingExpression.Trees.exe.config
+D:\Projects\ExpressionsParser\ParsingExpression.Trees\bin\Debug\ParsingExpression.Trees.exe
+D:\Projects\ExpressionsParser\ParsingExpression.Trees\bin\Debug\ParsingExpression.Trees.pdb
+D:\Projects\ExpressionsParser\ParsingExpression.Trees\bin\Debug\ParsingExpression.Common.dll
+D:\Projects\ExpressionsParser\ParsingExpression.Trees\bin\Debug\ParsingExpression.Common.pdb
+D:\Projects\ExpressionsParser\ParsingExpression.Trees\obj\Debug\ParsingExpression.Trees.csprojAssemblyReference.cache
+D:\Projects\ExpressionsParser\ParsingExpression.Trees\obj\Debug\ParsingExpression.Trees.csproj.CoreCompileInputs.cache
+D:\Projects\ExpressionsParser\ParsingExpression.Trees\obj\Debug\ParsingExpression.Trees.csproj.CopyComplete
+D:\Projects\ExpressionsParser\ParsingExpression.Trees\obj\Debug\ParsingExpression.Trees.exe
+D:\Projects\ExpressionsParser\ParsingExpression.Trees\obj\Debug\ParsingExpression.Trees.pdb

@@ -177,6 +177,5 @@ namespace ParsingExpression.Automaton
 
             return fsm;
         }
-        
     }
 }

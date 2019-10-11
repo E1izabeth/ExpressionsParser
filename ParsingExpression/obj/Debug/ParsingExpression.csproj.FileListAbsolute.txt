@@ -9,3 +9,15 @@ C:\Users\User\source\repos\ParsingExpression\ParsingExpression\obj\Debug\Parsing
 C:\Users\User\source\repos\ParsingExpression\ParsingExpression\obj\Debug\ParsingExpression.csproj.GenerateResource.Cache
 C:\Users\User\source\repos\ParsingExpression\ParsingExpression\bin\Debug\ParsingExpression.Common.dll
 C:\Users\User\source\repos\ParsingExpression\ParsingExpression\bin\Debug\ParsingExpression.Common.pdb
+D:\Projects\ExpressionsParser\ParsingExpression\bin\Debug\ParsingExpression.exe.config
+D:\Projects\ExpressionsParser\ParsingExpression\bin\Debug\ParsingExpression.exe
+D:\Projects\ExpressionsParser\ParsingExpression\bin\Debug\ParsingExpression.pdb
+D:\Projects\ExpressionsParser\ParsingExpression\bin\Debug\ParsingExpression.Common.dll
+D:\Projects\ExpressionsParser\ParsingExpression\bin\Debug\ParsingExpression.Common.pdb
+D:\Projects\ExpressionsParser\ParsingExpression\obj\Debug\ParsingExpression.csprojAssemblyReference.cache
+D:\Projects\ExpressionsParser\ParsingExpression\obj\Debug\ParsingExpression.ExprResources.resources
+D:\Projects\ExpressionsParser\ParsingExpression\obj\Debug\ParsingExpression.csproj.GenerateResource.cache
+D:\Projects\ExpressionsParser\ParsingExpression\obj\Debug\ParsingExpression.csproj.CoreCompileInputs.cache
+D:\Projects\ExpressionsParser\ParsingExpression\obj\Debug\ParsingExpression.csproj.CopyComplete
+D:\Projects\ExpressionsParser\ParsingExpression\obj\Debug\ParsingExpression.exe
+D:\Projects\ExpressionsParser\ParsingExpression\obj\Debug\ParsingExpression.pdb

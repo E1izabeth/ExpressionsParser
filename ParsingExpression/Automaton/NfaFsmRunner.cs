@@ -24,6 +24,14 @@ namespace ParsingExpression.Automaton
             int pos = 0;
             return IsMatch(text, ref pos, ref currState);
         }
+
+        public bool TryMatch(string text, out int pos)
+        {
+            var currState = _fsm.InitialState;
+            pos = 0;
+            return IsMatch(text, ref pos, ref currState);
+        }
+
         //    //int nextEdge = 0;
         //    var delayed = new Stack<Tuple<IFsmState, int>>();
         //    while (currState.IsFinal == false || pos == text.Length)
@@ -64,24 +72,27 @@ namespace ParsingExpression.Automaton
             if (tmpState.IsFinal)
                 return true;
 
-            var delayed = new Stack<Tuple<IFsmState, int>>();
+            var delayed = new Stack<(IFsmState fallbackState, int fallbackPos)>();
+            var backStates = new List<(int pos, int fallbackLimit, int fallbackCount)>();
 
-            while (tmpState.IsFinal == false || pos != text.Length)
+            //сохранять outtransitions, pos с которого откат и считать откаты.
+            // если кол-во откатов больше кол-ва outTransitions, false
+            while ((tmpState.IsFinal == false || pos != text.Length) && pos < text.Length)
             {
                 if (tmpState.OutTransitions.Any(t => t.Condition.IsSigma))
-                    delayed.Push(Tuple.Create(tmpState, pos));
+                    delayed.Push((tmpState, pos));
 
                 var visitedTransitions = new SortedSet<string>();
                 var transitions = tmpState.Flatten(
-                    s => s.OutTransitions.Where(nt => nt.Condition.IsSigma).Select(x => x.To), 
+                    s => s.OutTransitions.Where(nt => nt.Condition.IsSigma).Select(x => x.To),
                     tt => visitedTransitions.Add(tt.ToString())
                 ).SelectMany(ct => ct.OutTransitions.Where(nt => !nt.Condition.IsSigma));
-                
+
                 bool succ = false;
 
                 foreach (var transition in transitions)
                 {
-                    bool edge = MatchEdge(text, pos, transition);
+                    bool edge = this.MatchEdge(text, pos, transition);
                     if (edge)
                     {
                         tmpState = transition.To;
@@ -93,9 +104,29 @@ namespace ParsingExpression.Automaton
 
                 if (!succ)
                 {
+                    if (backStates.Count == 0 || backStates.Last().pos != pos)
+                    {
+                        backStates.Add((pos, tmpState.OutTransitions.Count, 1));
+                    }
+                    else
+                    {
+                        var last = backStates.Last();
+                        if (last.fallbackLimit < last.fallbackCount)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            var count = last.fallbackCount;
+                            count++;
+                            backStates.Remove(backStates.Last());
+                            backStates.Add((last.pos, last.fallbackLimit, count));
+                        }
+                    }
+
                     var backState = delayed.Pop();
-                    tmpState = backState.Item1;
-                    pos = backState.Item2;
+                    tmpState = backState.fallbackState;
+                    pos = backState.fallbackPos;
                 }
             }
             return tmpState.IsFinal;

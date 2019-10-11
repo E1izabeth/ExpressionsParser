@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
+//using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using ParsingExpression.Automaton;
 using ParsingExpression.RulesTree;
 
 namespace ParsingExpression
@@ -69,6 +70,68 @@ namespace ParsingExpression
         )*$
         ";
 
+        static readonly Dictionary<TokenKind, Expr> _patternsByTokenKind = new Dictionary<TokenKind, Expr>()
+        {
+            { TokenKind.checkOp, Expr.Characters("&") },
+            { TokenKind.checkNotOp, Expr.Characters("!") },
+            { TokenKind.openGroup, Expr.Characters("(") },
+            { TokenKind.closeGroup, Expr.Characters(")") },
+            { TokenKind.orOp, Expr.Characters("|") },
+            { TokenKind.escapedChar, Expr.Sequence(Expr.Characters("\\"), Expr.AnyChar()) },
+            { TokenKind.quantor, Expr.Alternatives(
+                Expr.Characters("*"),
+                Expr.Characters("?"),
+                Expr.Characters("+"),
+                Expr.Sequence(
+                    Expr.Characters("{"),
+                    Expr.Alternatives(
+                        Expr.Sequence(
+                            Expr.Number(Expr.NumberChar(), 1, int.MaxValue)
+                        ),
+                        Expr.Sequence(
+                            Expr.Number(Expr.NumberChar(), 1, int.MaxValue),
+                            Expr.Characters(",")
+                        ),
+                        Expr.Sequence(
+                            Expr.Characters(","),
+                            Expr.Number(Expr.NumberChar(), 1, int.MaxValue)
+                        ),
+                        Expr.Sequence(
+                            Expr.Number(Expr.NumberChar(), 1, int.MaxValue),
+                            Expr.Characters(","),
+                            Expr.Number(Expr.NumberChar(), 1, int.MaxValue)
+                        )
+                    ),
+                    Expr.Characters("}")
+                )
+            ) },
+            { TokenKind.charClass, Expr.Characters("[") },
+            { TokenKind.notClass, Expr.Characters("^") },
+            { TokenKind.rangeOp, Expr.Characters("-") },
+            { TokenKind.anyChar, Expr.Characters(".") },
+            { TokenKind.ch, Expr.Number( // [^\*\+\{\?\&\!\(\)\[\|\.\\]+   
+                Expr.Sequence(
+                    Expr.CheckNot(Expr.Alternatives(
+                        Expr.Characters("*"),
+                        Expr.Characters("+"),
+                        Expr.Characters("{"),
+                        Expr.Characters("?"),
+                        Expr.Characters("&"),
+                        Expr.Characters("!"),
+                        Expr.Characters("("),
+                        Expr.Characters(")"),
+                        Expr.Characters("["),
+                        Expr.Characters("|"),
+                        Expr.Characters("."),
+                        Expr.Characters("\\")
+                    )),
+                    Expr.AnyChar()
+                ), 1, int.MaxValue
+            ) },
+        };
+
+        static readonly Dictionary<TokenKind, IFsmRunner> _patternRunnersByTokenKind = _patternsByTokenKind.ToDictionary(kv => kv.Key, kv => Fsms.MakeFsmRunner(kv.Value, FsmRunnerMode.MDFA));
+
         //static readonly Dictionary<TokenKind, string> _patternsByTokenKind = new Dictionary<TokenKind, string>() {
         //    { TokenKind.checkOp, @"&" },
         //    { TokenKind.checkNotOp, @"!" },
@@ -90,28 +153,57 @@ namespace ParsingExpression
         //    kv => $"(?<{kv.Key}>{kv.Value})" 
         //)));
 
-        static readonly Regex _tokensRegex = new Regex(_tokensPattern, RegexOptions.IgnorePatternWhitespace);
+        // static readonly Regex _tokensRegex = new Regex(_tokensPattern, RegexOptions.IgnorePatternWhitespace);
 
         public RegexParser()
         {
         }
 
+        //bool TryTokenize(string line, out Token[] tokens)
+        //{
+        //    var match = _tokensRegex.Match(line);
+        //    if (match.Success)
+        //    {
+        //        tokens = Enum.GetValues(typeof(TokenKind)).OfType<TokenKind>().SelectMany(
+        //            k => match.Groups[k.ToString()].Captures.OfType<Capture>()
+        //                      .Select(c => new { c, k })
+        //        ).OrderBy(e => e.c.Index).Select(e => new Token(e.c.Value, e.k)).ToArray();
+        //    }
+        //    else
+        //    {
+        //        tokens = null;
+        //    }
+
+        //    return tokens != null;
+        //}
+
         bool TryTokenize(string line, out Token[] tokens)
         {
-            var match = _tokensRegex.Match(line);
-            if (match.Success)
+            var tokensList = new List<Token>();
+            var pos = 0;
+            while (pos < line.Length)
             {
-                tokens = Enum.GetValues(typeof(TokenKind)).OfType<TokenKind>().SelectMany(
-                    k => match.Groups[k.ToString()].Captures.OfType<Capture>()
-                              .Select(c => new { c, k })
-                ).OrderBy(e => e.c.Index).Select(e => new Token(e.c.Value, e.k)).ToArray();
-            }
-            else
-            {
-                tokens = null;
+                var matched = false;
+                foreach (var tokenPattern in _patternRunnersByTokenKind)
+                {
+                    if (tokenPattern.Value.TryMatch(line.Substring(pos), out var end))
+                    {
+                        tokensList.Add(new Token(line.Substring(pos, end), tokenPattern.Key));
+                        pos += end;
+                        matched = true;
+                        break;
+                    }
+                }
+
+                if (!matched)
+                {
+                    tokens = null;
+                    return false;
+                }
             }
 
-            return tokens != null;
+            tokens = tokensList.ToArray();
+            return true;
         }
 
         public bool TryParse(string pattern, out Expr expr)
@@ -269,8 +361,19 @@ namespace ParsingExpression
                         int minNum = -1, maxNum = -1;
                         this.ParseQuantifier(t.str, ref minNum, ref maxNum);
 
-                        var lastExprPart = items.Last.Value;
-                        items.RemoveLast();
+                        Expr lastExprPart;
+                        if (items.Last.Value is CharsExpr chars)
+                        {
+                            lastExprPart = new CharsExpr(chars.Chars.Last().ToString());
+                            items.RemoveLast();
+                            items.AddLast(new CharsExpr(chars.Chars.Substring(0, chars.Chars.Length - 1)));
+                        }
+                        else
+                        {
+                            lastExprPart = items.Last.Value;
+                            items.RemoveLast();
+                        }
+
                         items.AddLast(Expr.Number(lastExprPart, minNum, maxNum));
                         break;
                     case TokenKind.charClass:

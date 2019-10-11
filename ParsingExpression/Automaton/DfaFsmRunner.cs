@@ -18,12 +18,17 @@ namespace ParsingExpression.Automaton
 
         public bool IsMatch(string text)
         {
-            var currState = _fsm.InitialState;
-            int pos = 0;
+            return this.TryMatch(text, out var pos);
+        }
 
-            while (!currState.IsFinal || pos == text.Length)
+        public bool TryMatch(string text, out int end)
+        {
+            var currState = _fsm.InitialState;
+            var pos = 0;
+
+            while (!currState.IsFinal && pos < text.Length)
             {
-                var activeTransitions = currState.OutTransitions.Where(t => MatchEdge(text, pos, t)).ToArray();
+                var activeTransitions = currState.OutTransitions.Where(t => this.MatchEdge(text, pos, t)).ToArray();
 
                 if (activeTransitions.Length == 0)
                 {
@@ -36,10 +41,11 @@ namespace ParsingExpression.Automaton
                 }
                 else
                 {
-                    throw new InvalidOperationException("bad fsm");
+                    throw new InvalidOperationException("Bad fsm");
                 }
             }
 
+            end = pos;
             return currState.IsFinal;
         }
 

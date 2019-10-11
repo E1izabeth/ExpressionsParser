@@ -31,13 +31,28 @@ namespace ParsingExpression.XmlGraph
                     Label = n.Text,
                 }).ToArray(),
                 Links = _nodes.Values.SelectMany(
-                    n => n.GetConnectionTargets()
-                          .Select(t => new Dgml.DirectedGraphLink() {
-                              Source = n.Id,
-                              Target = t.Id,
+                    n => n.GetLinks()
+                          .Select(l => new Dgml.DirectedGraphLink() {
+                              Source = l.From.Id,
+                              Target = l.To.Id,
+                              Label = l.Text,
+                              Stroke = "#555555",
                           })
                 ).ToArray(),
             };
+        }
+    }
+
+    public class XmlGraphConnection
+    {
+        public XmlGraphNode From { get; private set; }
+        public XmlGraphNode To { get; private set; }
+        public string Text { get; set; }
+
+        public XmlGraphConnection(XmlGraphNode from, XmlGraphNode to)
+        {
+            this.From = from;
+            this.To = to;
         }
     }
 
@@ -45,7 +60,8 @@ namespace ParsingExpression.XmlGraph
     {
         XmlGraph _owner;
 
-        SortedSet<XmlGraphNode> _links = new SortedSet<XmlGraphNode>();
+        // SortedSet<XmlGraphNode> _targets = new SortedSet<XmlGraphNode>();
+        List<XmlGraphConnection> _links = new List<XmlGraphConnection>();
 
         public string Id { get; private set; }
         public string Text { get; set; }
@@ -57,17 +73,22 @@ namespace ParsingExpression.XmlGraph
             this.Id = id;
         }
 
-        public XmlGraphNode[] GetConnectionTargets()
+        public XmlGraphConnection[] GetLinks()
         {
             return _links.ToArray();
         }
 
-        public bool ConnectTo(XmlGraphNode target)
+        public XmlGraphConnection ConnectTo(XmlGraphNode target)
         {
             if (target._owner != _owner)
                 throw new InvalidOperationException();
 
-            return _links.Add(target);
+            //if (!_targets.Add(target))
+            //    throw new InvalidOperationException();
+
+            var link = new XmlGraphConnection(this, target);
+            _links.Add(link);
+            return link;
         }
 
         public XmlGraphNode CreateNext(string id = null)

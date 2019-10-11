@@ -4,3 +4,9 @@ C:\Users\User\source\repos\ParsingExpression\ParsingExpression.Common\obj\Debug\
 C:\Users\User\source\repos\ParsingExpression\ParsingExpression.Common\obj\Debug\ParsingExpression.Common.csproj.CoreCompileInputs.cache
 C:\Users\User\source\repos\ParsingExpression\ParsingExpression.Common\obj\Debug\ParsingExpression.Common.dll
 C:\Users\User\source\repos\ParsingExpression\ParsingExpression.Common\obj\Debug\ParsingExpression.Common.pdb
+D:\Projects\ExpressionsParser\ParsingExpression.Common\bin\Debug\ParsingExpression.Common.dll
+D:\Projects\ExpressionsParser\ParsingExpression.Common\bin\Debug\ParsingExpression.Common.pdb
+D:\Projects\ExpressionsParser\ParsingExpression.Common\obj\Debug\ParsingExpression.Common.csprojAssemblyReference.cache
+D:\Projects\ExpressionsParser\ParsingExpression.Common\obj\Debug\ParsingExpression.Common.csproj.CoreCompileInputs.cache
+D:\Projects\ExpressionsParser\ParsingExpression.Common\obj\Debug\ParsingExpression.Common.dll
+D:\Projects\ExpressionsParser\ParsingExpression.Common\obj\Debug\ParsingExpression.Common.pdb

@@ -12,6 +12,72 @@ using System.Diagnostics;
 
 namespace ParsingExpression
 {
+    class Program2
+    {
+        static IFsm MakeMDfa(Expr expr, int depth, bool debug)
+        {
+            var fsm = ExprFsmBuilder.BuildFsm(expr, e => MakeMDfa(e, depth + 1, debug));
+            var fsm2 = fsm.RemoveEmptyTransitions();
+            var fsm3 = fsm2.MakeDFA();
+            var fsm4 = fsm3.MinimizeDFA();
+
+            if (debug)
+            {
+                var fname = "regex" + depth;
+                expr.SaveTreeToFile(fname + "_0_tree.dgml");
+                fsm.SaveGraphToFile(fname + "_1_nfa.dgml");
+                fsm2.SaveGraphToFile(fname + "_2_nfa_we.dgml");
+                fsm3.SaveGraphToFile(fname + "_3_dfa.dgml");
+                fsm4.SaveGraphToFile(fname + "_4_minimized.dgml");
+            }
+
+            return fsm4;
+        }
+
+        static IFsmRunner MakeMDfaRunner(IFsm fsm)
+        {
+            return new DfaFsmRunner(fsm, MakeMDfaRunner);
+        }
+
+        static void Main(string[] args)
+        {
+            if (args.Length < 2)
+            {
+                Console.WriteLine("Usage: ");
+                Console.WriteLine("regex.exe <regex> <text> [-debug]");
+            }
+            else
+            {
+                string regexp = args[0]; // @"b(ab)*bbc?";
+                string text = args[1]; // "bbbc";
+
+                var p = new RegexParser();
+                if (p.TryParse(regexp, out Expr expr))
+                {
+
+                    var fsm = MakeMDfa(expr, 1, args.Length > 2 && args[2] == "-debug");
+                    var runner = MakeMDfaRunner(fsm);
+
+                    if (runner.IsMatch(text))
+                    {
+                        Console.WriteLine("OK");
+                        Environment.ExitCode = 0;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Fail");
+                        Environment.ExitCode = -1;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Invalid regex");
+                    Environment.ExitCode = -2;
+                }
+            }
+        }
+    }
+
     class Program
     {
         static TimeSpan Measure(int count, Action act)
@@ -28,89 +94,62 @@ namespace ParsingExpression
             return new TimeSpan(sw.ElapsedTicks / count);
         }
 
-        static void Main()
+        static void Main2()
         {
-            const int iterations = 1000000;
+            const int iterations = 100000;
             var p = new RegexParser();
-            string regexp = @"a((b|c|[a-zA-Z])s*n|s*)b";
-            //regexp = @"a(b|c|d)b";
-            string text = "assssssb";
+
+            string regexp = @"b(ab)*bbc?";
+            string text = "bbbc";
+
             p.TryParse(regexp, out Expr expr);
-
-
             Console.WriteLine(expr.CollectTree(
                 e => e.GetItems(),
                 e => e.GetType().Name + ": " + e.ToString()
             ));
 
-            ExprTreeRunner treeRunner = new ExprTreeRunner(expr);
-            var ans2 = treeRunner.IsMatch(text);
-
-            var t2 = Measure(iterations, () => treeRunner.IsMatch(text));
-
-            // treeRunner.LastState.SaveStatesLogToFile(@"c:\temp\treematch.dgml");
-
-            //p.TryParse(regexp, out Grammar grammar);
-            //bool IsMatched = false;
-            //var st = ParsingState.MakeInitial(str, expr);
-            //var result = expr.Match(st); //var result = grammar.Match(st);
-
-            //if (result.LastMatchSuccessed == true && result.Pos == result.Text.Length)
-            //    IsMatched = true;
-            //Console.WriteLine("\tResult {0} for \"{1}\"", IsMatched, str);
-
-
             //var fsm = ExprFsmBuilder.BuildFsm(expr, null);
-            //fsm.SaveGraphToFile(@"c:\temp\out.dgml");
-
-            //var fsm2 = fsm.RemoveEmptyTransitions().Optimize();
-            //fsm2.SaveGraphToFile(@"c:\temp\out2.dgml");
-
-            //var testFsm = new Fsm(4) {
-            //    { 0, 3, 'b' },
-            //    { 3, 2 },
-            //    { 0, 2 },
-            //    { 0, 1, 'a' },
-            //    { 3, 1, 'a' },
-            //    { 1, 3 },
-            //    { 2, 1, 'b' }
-            //};
-            //testFsm.States[3].SetFinal();
-            //testFsm.SetInitialState(testFsm.States[0]);
-            //testFsm.SaveGraphToFile(@"c:\temp\test.dgml");
-
-            // var fsm3 = fsm2.MakeDFA();
-            //fsm3.SaveGraphToFile(@"c:\temp\out3.dgml");
-
-           
+            //fsm.SaveGraphToFile(@"c:\temp\outFSM.dgml");
+            //var fsmWithoutEmpty = fsm.RemoveEmptyTransitions().Optimize();
+            //var fsmWithoutEmptyAndOptimized = fsm.RemoveEmptyTransitions().Optimize();
+            //fsmWithoutEmpty.SaveGraphToFile(@"c:\temp\outFSMwithoutEmptyAndOptimized.dgml");
+            //fsmWithoutEmptyAndOptimized.SaveGraphToFile(@"c:\temp\outFSMwithoutEmpty.dgml");
+            //var fsmDFA = fsmWithoutEmptyAndOptimized.MakeDFA();
+            //fsmDFA.SaveGraphToFile(@"c:\temp\outDFA.dgml");
+            //var m2 = fsmDFA.MinimizeDFA();
+            //m2.SaveGraphToFile(@"c:\temp\outDFA2.dgml");
 
             var nfaRunner = Fsms.MakeFsmRunner(expr, FsmRunnerMode.NFA);
-            var ans4 = nfaRunner.IsMatch(text);
-
-            var t4 = Measure(iterations, () => nfaRunner.IsMatch(text));
+            var nfaAns = nfaRunner.IsMatch(text);
+            var nfaT = Measure(iterations, () => nfaRunner.IsMatch(text));
 
             var dfaRunner = Fsms.MakeFsmRunner(expr, FsmRunnerMode.DFA);
-            var ans3 = dfaRunner.IsMatch(text);
+            var dfaAns = dfaRunner.IsMatch(text);
+            var dfaT = Measure(iterations, () => dfaRunner.IsMatch(text));
 
-            var t3 = Measure(iterations,() => dfaRunner.IsMatch(text));
-            //int position = 0;
-            //var r = expr.Match(text, ref position);
-            var ans1 = false;
-            var t1 = Measure(iterations, () => {
+            var mdfaRunner = Fsms.MakeFsmRunner(expr, FsmRunnerMode.DFA);
+            var mdfaAns = mdfaRunner.IsMatch(text);
+            var mdfaT = Measure(iterations, () => mdfaRunner.IsMatch(text));
+
+            var exprAns = false;
+            var exprT = Measure(iterations, () =>
+            {
                 int position = 0;
-                ans1 = expr.Match(text, ref position);
+                exprAns = expr.Match(text, ref position) && position == text.Length;
             });
 
-            Console.WriteLine(t1 + "      " + ans1);
-            Console.WriteLine(t2 + "      " + ans2 + "   " +  "tree");
-            Console.WriteLine(t3 + "      " + ans3 + "   " + "DFA");
-            Console.WriteLine(t4 + "      " + ans4 + "   " + "NFA");
-            return;
+            ExprTreeRunner treeRunner = new ExprTreeRunner(expr);
+            var treeAns = treeRunner.IsMatch(text);
+            var treeT = Measure(iterations, () => treeRunner.IsMatch(text));
+            treeRunner.LastState.SaveStatesLogToFile(@"c:\temp\treematch.dgml");
 
-            //if (expr.Match(text, ref position) & position == text.Length)
-            //    Console.WriteLine("True");
-            //else
-            //    Console.WriteLine("False");
+            Console.WriteLine("\tResult {0} for \"{1}\"", treeAns, text);
+            Console.WriteLine(exprT + "\t" + exprAns + "\t recursive tree");  //just parsed expr
+            Console.WriteLine(treeT + "\t" + treeAns + "\t stackless tree");
+            Console.WriteLine(nfaT + "\t" + nfaAns + "\t NFA");
+            Console.WriteLine(dfaT + "\t" + dfaAns + "\t DFA");
+            Console.WriteLine(dfaT + "\t" + mdfaAns + "\t MDFA");
+            return;
         }
 
         static void Main3()

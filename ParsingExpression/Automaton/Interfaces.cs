@@ -9,6 +9,7 @@ namespace ParsingExpression.Automaton
     interface IFsmRunner
     {
         bool IsMatch(string text);
+        bool TryMatch(string text, out int end);
     }
 
     interface IFsm

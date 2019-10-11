@@ -22,6 +22,11 @@ namespace ParsingExpression.RulesTree
 
         public bool IsMatch(string text)
         {
+            return this.TryMatch(text, out var pos);
+        }
+
+        public bool TryMatch(string text, out int pos)
+        {
             _currState = ParsingState.MakeInitial(text, _expr);
             do
             {
@@ -29,6 +34,7 @@ namespace ParsingExpression.RulesTree
             }
             while (_currState.Parent != null);
 
+            pos = _currState.Pos;
             return _currState.LastMatchSuccessed == null || _currState.LastMatchSuccessed == false ? false : true;
         }
 

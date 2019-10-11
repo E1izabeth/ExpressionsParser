@@ -129,7 +129,7 @@ namespace ParsingExpression
         {
             if (pos >= text.Length)
                 return false;
-            
+
             if (this.ClassTest(text[pos]))
             {
                 ++pos;
@@ -147,7 +147,7 @@ namespace ParsingExpression
         {
             if (st.Pos >= st.Text.Length)
                 return st.ExitChild(false);
-           
+
             if (this.ClassTest(st.Text[st.Pos]))
             {
                 return st.ExitChild(true, 1);
@@ -429,11 +429,11 @@ namespace ParsingExpression
 
         protected override ParsingState MatchImpl(ParsingState st)
         {
-        //    int pos = st.Pos;
-        //    if (this.Child.Match(st.EnterChild(this.Child)).LastMatchSuccessed == true)
-        //        return st.ExitChild(true, pos - st.Pos);
-        //    else
-        //        return st.ExitChild(false, st.Pos - pos);
+            //    int pos = st.Pos;
+            //    if (this.Child.Match(st.EnterChild(this.Child)).LastMatchSuccessed == true)
+            //        return st.ExitChild(true, pos - st.Pos);
+            //    else
+            //        return st.ExitChild(false, st.Pos - pos);
 
             var newState = this.Child.Match(st.EnterChild(this.Child));
             return newState.ExitChild(newState.LastMatchSuccessed.Value, -(newState.Pos - st.Pos));
